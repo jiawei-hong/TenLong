@@ -18,9 +18,9 @@
                 <img src="{{ book.img_url }}" class="card-img-top" alt="...">
                 <div class="card-body text-center">
                     <h5 class="card-title">{{ book.name }}</h5>
-                    <p class="card-text">
-                        <!-- Show Price Code... -->
-                    </p>
+                    <p class="card-text">{{ book.lang }}/{{ book.author }}/{{ book.category }}/{{ book.publish_date }}</p>
+                    <p class="card-text">{{ book.price }}</p>
+                    <p class="card-text">{{ book.status }}</p>
 
                     <a href="{{ book.url }}" class="btn btn-primary">前往書本網址</a>
                 </div>
@@ -30,21 +30,14 @@
     </div>
 
     <script>
-        window.addEventListener('scroll', function (e) {
-            console.log(getScrollTop());
+        window.addEventListener('scroll',function(){
+            let windowMaxHeight = document.body.scrollHeight - window.innerHeight;
+            let bodyHeight = document.documentElement.scrollTop - 16;
+            
+            if(bodyHeight == windowMaxHeight){
+                console.log('已到最底');
+            }
         });
-
-        function getScrollTop() {
-            var scrollTop = 0, bodyScrollTop = 0, documentScrollTop = 0;
-            if (document.body) {
-                bodyScrollTop = document.body.scrollTop;
-            }
-            if (document.documentElement) {
-                documentScrollTop = document.documentElement.scrollTop;
-            }
-            scrollTop = (bodyScrollTop - documentScrollTop > 0) ? bodyScrollTop : documentScrollTop;
-            return scrollTop;
-        }
     </script>
 </body>
 

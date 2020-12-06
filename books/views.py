@@ -13,28 +13,38 @@ def index(request):
 
 def test(request):
     req = requests.get(f'https://www.tenlong.com.tw/search', params={
-        'keyword': request.POST['keyword']
+        'keyword': request.GET['keyword']
     })
     soup = BeautifulSoup(req.text, 'html.parser')
-    img_prefix_url = 'https://www.tenlong.com.tw'
+    prefix_url = 'https://www.tenlong.com.tw'
     books = []
 
-    for book in soup.find('div', class_='search-result-list').find('ul').find_all('li', class_=lambda x: x != 'promo'):
-        book_data = {
-            'name': '',
-            'url': '',
-            'img_url': ''
-        }
+    for book in soup.find('div', class_='search-result-list').find('ul').find_all('li', class_= lambda x: x != 'promo'):
         book_img_url = book.find('a', class_='cover')
+        book_detail_div = book.find('div', class_='book-data')
 
-        if(book_img_url is not None):
+        try:
+            book_data = {}
             book_img = book_img_url.find('img')
-            book_data['name'] = book_img['alt'][:len(book_img['alt']) - 6]
-            book_data['url'] = img_prefix_url + book_img_url['href']
+            book_detail = book_detail_div.find('strong').find('a')
+            book_basic = book_detail_div.find('ul', class_='item-info').find('li', class_='basic')
+            book_price = book_detail_div.find('ul', class_='item-info').find('li', class_='pricing')
+            book_basic_list = ['lang', 'author', 'category', 'publish-date']
 
-            if('src' in book_img.attrs):
-                book_data['img_url'] = book_img['src']
+            for index, x in enumerate(book_basic_list):
+                if((index + 1) == len(book_basic_list)):
+                    book_data['publish_date'] = book_basic.find('span', class_=x).text
+                else:
+                    book_data[x] = book_basic.find('span', class_=x).text
+
+            book_data['img_url'] = book_img['src']
+            book_data['name'] = book_detail.text
+            book_data['url'] = prefix_url + book_detail['href']
+            book_data['price'] = book_price.find('span', class_='price').text
+            book_data['status'] = book_price.find('span',class_='status').text
             books.append(book_data)
+        except:
+            pass
 
     return render(request, 'books.html', {
         'books': books
