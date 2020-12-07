@@ -15,10 +15,11 @@
         <div class="card-columns">
             {% for book in books %}
             <div class="card" style="width:18rem;">
-                <img src="{{ book.img_url }}" class="card-img-top" alt="...">
+                <img src="{{ book.img_url }}" class="card-img-top">
                 <div class="card-body text-center">
                     <h5 class="card-title">{{ book.name }}</h5>
-                    <p class="card-text">{{ book.lang }}/{{ book.author }}/{{ book.category }}/{{ book.publish_date }}</p>
+                    <p class="card-text">{{ book.lang }}/{{ book.author }}/{{ book.category }}/{{ book.publish_date }}
+                    </p>
                     <p class="card-text">{{ book.price }}</p>
                     <p class="card-text">{{ book.status }}</p>
 
@@ -30,12 +31,56 @@
     </div>
 
     <script>
-        window.addEventListener('scroll',function(){
+        let page = 2;
+        let card_columns = document.querySelector('.card-columns');
+
+        window.addEventListener('scroll', function () {
             let windowMaxHeight = document.body.scrollHeight - window.innerHeight;
             let bodyHeight = document.documentElement.scrollTop - 16;
-            
-            if(bodyHeight == windowMaxHeight){
-                console.log('已到最底');
+
+            if (bodyHeight == windowMaxHeight) {
+                fetch('/ajax/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        keyword: '{{ keyword }}',
+                        page: page,
+                    })
+                }).then(res => res.json()).then(res => {
+                    res.forEach(data => {
+                        let cardDiv = document.createElement('div');
+                        let cardImg = document.createElement('img');
+                        let cardBody = document.createElement('div');
+                        let cardDetail = document.createElement('p');
+                        let cardPrice = document.createElement('p');
+                        let cardStatus = document.createElement('p');
+                        let cardH5 = document.createElement('h5');
+
+                        cardDiv.className = 'card';
+                        cardDiv.style.width = '18rem';
+                        cardImg.className = 'card-img-top';
+                        cardImg.src = data.img_url;
+                        cardBody.className = 'card-body textcenter';
+
+
+                        cardH5.className = 'card-title';
+                        cardH5.innerText = data.name;
+                        cardDetail.className = 'card-text';
+                        cardDetail.innerText = `${data.lang}/${data.author}/${data.category}/${data.publish_date}`;
+                        cardPrice.className = 'card-text';
+                        cardPrice.innerText = data.price
+                        cardStatus.className = 'card-text';
+                        cardStatus.innerText = data.status;
+
+                        cardBody.append(cardH5, cardDetail, cardPrice, cardStatus);
+                        cardDiv.append(cardImg, cardBody)
+                        card_columns.append(cardDiv);
+                    });
+
+                    page++;
+                });
             }
         });
     </script>

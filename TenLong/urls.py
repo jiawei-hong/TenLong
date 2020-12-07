@@ -20,5 +20,6 @@ from books import views as book_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', book_view.index),
-    path('post/', book_view.test)
+    path('post/', book_view.get_keyword_books),
+    path('ajax/', book_view.get_ajax_books)
 ]
