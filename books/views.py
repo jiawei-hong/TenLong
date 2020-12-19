@@ -13,7 +13,10 @@ def index(request):
 
 
 def get_keyword_books(request):
-    request_text = get_request_text(request.POST['keyword'])
+    request_text = get_request_text('https://www.tenlong.com.tw/search', {
+        'keyword': request.POST['keyword'],
+        'page': 1
+    })
 
     data = get_books(request_text)
 
@@ -25,17 +28,17 @@ def get_keyword_books(request):
 
 def get_ajax_books(request):
     json_data = json.loads(request.body)
-    data = get_request_text(json_data['keyword'], json_data['page'])
+    data = get_request_text('https://www.tenlong.com.tw/search', {
+        'keyword': json_data['keyword'],
+        'page': json_data['page']
+    })
     books = get_books(data)
 
     return HttpResponse(json.dumps(books))
 
 
-def get_request_text(keyword, page=1):
-    req = requests.get(f'https://www.tenlong.com.tw/search', params={
-        'keyword': keyword,
-        'page': page
-    })
+def get_request_text(url, params={}):
+    req = requests.get(url, params=params)
 
     return req.text
 
@@ -60,11 +63,8 @@ def get_books(request_text):
             book_basic_list = ['lang', 'author', 'category', 'publish-date']
 
             for index, x in enumerate(book_basic_list):
-                if((index + 1) == len(book_basic_list)):
-                    book_data['publish_date'] = book_basic.find(
-                        'span', class_=x).text
-                else:
-                    book_data[x] = book_basic.find('span', class_=x).text
+                book_data[x.replace('-', '_')
+                          ] = book_basic.find('span', class_=x).text
 
             book_data['img_url'] = book_img['src']
             book_data['name'] = book_detail.text
@@ -76,3 +76,47 @@ def get_books(request_text):
             pass
 
     return books
+
+
+def get_sale_book(request_text):
+    soup = BeautifulSoup(request_text, 'html.parser')
+    books = []
+
+    try:
+        for book in soup.find('div', class_='list-wrapper').find('ul').find_all('li', class_='single-book'):
+            book_data = {}
+
+            book_name = book.find('strong', class_='title').find('a')
+            book_img_url = book.find('a', class_='cover').find('img')['src']
+            book_price = book.find('div', class_='pricing')
+            book_url = book_name['href']
+
+            book_data['name'] = book_name.text
+            book_data['img_url'] = book_img_url
+            book_data['url'] = 'https://www.tenlong.com.tw' + book_url
+            book_data['price'] = book_price.text.replace('\n', '')
+            books.append(book_data)
+
+    except:
+        pass
+
+    return books
+
+
+def get_sale_books(request, sale_id):
+    sale_dict = {
+        0: 1127,
+        1: 1126,
+        2: 1125,
+        3: 1124,
+        4: 1123,
+        5: 1122,
+        6: 1121
+    }
+    prefix_url = f"https://www.tenlong.com.tw/special/{sale_dict[sale_id]}"
+    req_text = get_request_text(prefix_url)
+    books = get_sale_book(req_text)
+
+    return render(request, 'test.html', {
+        'books': books
+    })

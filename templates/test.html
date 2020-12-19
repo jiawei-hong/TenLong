@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block title %} 查詢結果 {% endblock %}
+
+{% block content %}
+<div class="card-columns">
+    {% for book in books %}
+    <div class="card" style="width:18rem;">
+        <img src="{{ book.img_url }}" class="card-img-top">
+        <div class="card-body text-center">
+            <h5 class="card-title">{{ book.name }}</h5>
+            <p class="card-text">價格 :{{ book.price }}</p>
+
+            <a href="{{ book.url }}" class="btn btn-primary">前往書本網址</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

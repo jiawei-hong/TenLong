@@ -1,0 +1,6 @@
+.vscode
+.venv
+venv/
+TenLong/__pycache__/
+books/__pycache__/
+books/migrations/__pycache__/
