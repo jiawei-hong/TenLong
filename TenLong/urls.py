@@ -22,5 +22,5 @@ urlpatterns = [
     path('', book_view.index),
     path('sale/<int:sale_id>', book_view.get_sale_books, name='sale'),
     path('keyword/', book_view.get_keyword_books),
-    path('ajax/', book_view.get_ajax_books)
+    path('ajax/<int:ajax_id>', book_view.get_ajax_books)
 ]

@@ -3,49 +3,42 @@
 {% block title %} 查詢結果 {% endblock %}
 
 {% block content %}
-<div class="card-columns">
-    {% for book in books %}
-    <div class="card" style="width:18rem;">
-        <img src="{{ book.img_url }}" class="card-img-top">
-        <div class="card-body text-center">
-            <h5 class="card-title">{{ book.name }}</h5>
-            <p class="card-text">{{ book.lang }}/{{ book.author }}/{{ book.category }}/{{ book.publish_date }}
-            </p>
-            <p class="card-text">{{ book.price }}</p>
-            <p class="card-text">{{ book.status }}</p>
-
-            <a href="{{ book.url }}" class="btn btn-primary">前往書本網址</a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+<div class="card-columns"></div>
 
 <script>
-    let page = 2;
+    let page = 1;
     let card_columns = document.querySelector('.card-columns');
+
+    window.onload = async function () {
+        getAndRenderBooks();
+    }
 
     window.addEventListener('scroll', function () {
         let windowMaxHeight = document.body.scrollHeight - window.innerHeight;
         let bodyHeight = document.documentElement.scrollTop;
 
         if (bodyHeight == windowMaxHeight) {
-            fetch('/ajax/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    keyword: '{{ keyword }}',
-                    page: page,
-                })
-            }).then(res => res.json()).then(res => {
-                generate_books(res);
-                page++;
-            });
+            getAndRenderBooks();
         }
     });
 
-    function generate_books(response) {
+    function getBooks() {
+        ajax_url = `/ajax/${'{{ keyword }}'.length === 0 ? 1 : 0}`;
+
+        return fetch(ajax_url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                url: '{{ url }}',
+                keyword: '{{ keyword }}',
+                page: page,
+            })
+        }).then(res => res.json()).then(res => res);
+    }
+
+    function renderBooks(response) {
         response.forEach(data => {
             let cardDiv = document.createElement('div');
             let cardImg = document.createElement('img');
@@ -54,6 +47,7 @@
             let cardPrice = document.createElement('p');
             let cardStatus = document.createElement('p');
             let cardH5 = document.createElement('h5');
+            let cardButton = document.createElement('a');
 
             cardDiv.className = 'card';
             cardDiv.style.width = '18rem';
@@ -62,17 +56,30 @@
             cardBody.className = 'card-body textcenter';
             cardH5.className = 'card-title';
             cardH5.innerText = data.name;
-            cardDetail.className = 'card-text';
-            cardDetail.innerText = `${data.lang}/${data.author}/${data.category}/${data.publish_date}`;
             cardPrice.className = 'card-text';
             cardPrice.innerText = data.price
-            cardStatus.className = 'card-text';
-            cardStatus.innerText = data.status;
+            cardButton.className = 'btn btn-primary';
+            cardButton.innerText = '查看書本';
+            cardButton.href = data.url;
 
-            cardBody.append(cardH5, cardDetail, cardPrice, cardStatus);
+            if (Object.keys(data).indexOf('detail') != -1) {
+                cardDetail.className = 'card-text';
+                cardDetail.innerText = `${data.lang}/${data.author}/${data.category}/${data.publish_date}`;
+                cardStatus.className = 'card-text';
+                cardStatus.innerText = data.status;
+            }
+
+            cardBody.append(cardH5, cardDetail, cardPrice, cardStatus, cardButton);
             cardDiv.append(cardImg, cardBody)
             card_columns.append(cardDiv);
         });
+    }
+
+    async function getAndRenderBooks() {
+        let books = await getBooks();
+
+        renderBooks(books);
+        page++;
     }
 </script>
 {% endblock %}

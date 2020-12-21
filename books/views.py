@@ -13,26 +13,21 @@ def index(request):
 
 
 def get_keyword_books(request):
-    request_text = get_request_text('https://www.tenlong.com.tw/search', {
-        'keyword': request.POST['keyword'],
-        'page': 1
-    })
-
-    data = get_books(request_text)
-
     return render(request, 'books.html', {
-        'books': data,
+        'url': 'https://www.tenlong.com.tw/search',
         'keyword': request.POST['keyword']
     })
 
 
-def get_ajax_books(request):
-    json_data = json.loads(request.body)
-    data = get_request_text('https://www.tenlong.com.tw/search', {
-        'keyword': json_data['keyword'],
-        'page': json_data['page']
+def get_ajax_books(request, ajax_id):
+    req_params = json.loads(request.body)
+
+    data = get_request_text(req_params['url'], {
+        'keyword': req_params['keyword'],
+        'page': req_params['page']
     })
-    books = get_books(data)
+
+    books = get_books(data) if ajax_id == 0 else get_sale_book(data)
 
     return HttpResponse(json.dumps(books))
 
@@ -53,7 +48,9 @@ def get_books(request_text):
         book_detail_div = book.find('div', class_='book-data')
 
         try:
-            book_data = {}
+            book_data = {
+                'detail': []
+            }
             book_img = book_img_url.find('img')
             book_detail = book_detail_div.find('strong').find('a')
             book_basic = book_detail_div.find(
@@ -63,8 +60,8 @@ def get_books(request_text):
             book_basic_list = ['lang', 'author', 'category', 'publish-date']
 
             for index, x in enumerate(book_basic_list):
-                book_data[x.replace('-', '_')
-                          ] = book_basic.find('span', class_=x).text
+                book_data['detail'].append(
+                    book_basic.find('span', class_=x).text)
 
             book_data['img_url'] = book_img['src']
             book_data['name'] = book_detail.text
@@ -104,19 +101,9 @@ def get_sale_book(request_text):
 
 
 def get_sale_books(request, sale_id):
-    sale_dict = {
-        0: 1127,
-        1: 1126,
-        2: 1125,
-        3: 1124,
-        4: 1123,
-        5: 1122,
-        6: 1121
-    }
-    prefix_url = f"https://www.tenlong.com.tw/special/{sale_dict[sale_id]}"
-    req_text = get_request_text(prefix_url)
-    books = get_sale_book(req_text)
+    sale_ids = [1127, 1126, 1125, 1124, 1123, 1122, 1121]
+    prefix_url = f"https://www.tenlong.com.tw/special/{sale_ids[sale_id]}"
 
-    return render(request, 'test.html', {
-        'books': books
+    return render(request, 'books.html', {
+        'url': prefix_url
     })
