@@ -32,7 +32,9 @@ def get_ajax_books(request, ajax_id):
     return HttpResponse(json.dumps(books))
 
 
-def get_request_text(url, params={}):
+def get_request_text(url, params=None):
+    if params is None:
+        params = {}
     req = requests.get(url, params=params)
 
     return req.text
@@ -49,7 +51,7 @@ def get_books(request_text):
 
         try:
             book_data = {
-                'detail': []
+                'detail': {}
             }
             book_img = book_img_url.find('img')
             book_detail = book_detail_div.find('strong').find('a')
@@ -59,9 +61,8 @@ def get_books(request_text):
                 'ul', class_='item-info').find('li', class_='pricing')
             book_basic_list = ['lang', 'author', 'category', 'publish-date']
 
-            for index, x in enumerate(book_basic_list):
-                book_data['detail'].append(
-                    book_basic.find('span', class_=x).text)
+            for x in book_basic_list:
+                book_data['detail'][x.replace('-', '_')] = book_basic.find('span', class_=x).text
 
             book_data['img_url'] = book_img['src']
             book_data['name'] = book_detail.text
@@ -103,6 +104,7 @@ def get_sale_book(request_text):
 def get_sale_books(request, sale_id):
     sale_ids = [1127, 1126, 1125, 1124, 1123, 1122, 1121]
     prefix_url = f"https://www.tenlong.com.tw/special/{sale_ids[sale_id]}"
+
 
     return render(request, 'books.html', {
         'url': prefix_url

@@ -9,7 +9,7 @@
     let page = 1;
     let card_columns = document.querySelector('.card-columns');
 
-    window.onload = async function () {
+    window.onload = function () {
         getAndRenderBooks();
     }
 
@@ -23,7 +23,7 @@
     });
 
     function getBooks() {
-        ajax_url = `/ajax/${'{{ keyword }}'.length === 0 ? 1 : 0}`;
+        let ajax_url = `/ajax/${'{{ keyword }}'.length === 0 ? 1 : 0}`;
 
         return fetch(ajax_url, {
             method: 'POST',
@@ -64,7 +64,7 @@
 
             if (Object.keys(data).indexOf('detail') != -1) {
                 cardDetail.className = 'card-text';
-                cardDetail.innerText = `${data.lang}/${data.author}/${data.category}/${data.publish_date}`;
+                cardDetail.innerText = `${data.detail.lang}/${data.detail.author}/${data.detail.category}/${data.detail.publish_date}`;
                 cardStatus.className = 'card-text';
                 cardStatus.innerText = data.status;
             }
