@@ -43,7 +43,6 @@
             let cardDiv = document.createElement('div');
             let cardImg = document.createElement('img');
             let cardBody = document.createElement('div');
-            let cardDetail = document.createElement('p');
             let cardPrice = document.createElement('p');
             let cardStatus = document.createElement('p');
             let cardH5 = document.createElement('h5');
@@ -63,13 +62,11 @@
             cardButton.href = data.url;
 
             if (Object.keys(data).indexOf('detail') != -1) {
-                cardDetail.className = 'card-text';
-                cardDetail.innerText = `${data.detail.lang}/${data.detail.author}/${data.detail.category}/${data.detail.publish_date}`;
                 cardStatus.className = 'card-text';
                 cardStatus.innerText = data.status;
             }
 
-            cardBody.append(cardH5, cardDetail, cardPrice, cardStatus, cardButton);
+            cardBody.append(cardH5, cardPrice, cardStatus, cardButton);
             cardDiv.append(cardImg, cardBody)
             card_columns.append(cardDiv);
         });

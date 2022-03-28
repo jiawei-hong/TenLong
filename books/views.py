@@ -45,30 +45,25 @@ def get_books(request_text):
     prefix_url = 'https://www.tenlong.com.tw'
     books = []
 
-    for book in soup.find('div', class_='search-result-list').find('ul').find_all('li', class_=lambda x: x != 'promo'):
-        book_img_url = book.find('a', class_='cover')
-        book_detail_div = book.find('div', class_='book-data')
+    for book in soup.find('div', class_='search-result-list').find('ul').find_all('li'):
+        book_div = book.find('div')
+        book_data = {}
 
         try:
-            book_data = {
-                'detail': {}
-            }
-            book_img = book_img_url.find('img')
+            book_img_url = book_div.find('a', class_='cover').find('img')
+            book_detail_div = book_div.find('div', class_='book-data')
+
             book_detail = book_detail_div.find('strong').find('a')
-            book_basic = book_detail_div.find(
-                'ul', class_='item-info').find('li', class_='basic')
-            book_price = book_detail_div.find(
-                'ul', class_='item-info').find('li', class_='pricing')
-            book_basic_list = ['lang', 'author', 'category', 'publish-date']
+            book_info = book_detail_div.find('ul', class_='item-info')
+            book_basic = book_info.find('li', class_='basic')
+            book_price = book_info.find('li', class_='pricing')
 
-            for x in book_basic_list:
-                book_data['detail'][x.replace('-', '_')] = book_basic.find('span', class_=x).text
-
-            book_data['img_url'] = book_img['src']
+            book_data['img_url'] = book_img_url['src']
             book_data['name'] = book_detail.text
             book_data['url'] = prefix_url + book_detail['href']
             book_data['price'] = book_price.find('span', class_='price').text
-            book_data['status'] = book_price.find('span', class_='status').text
+            book_data['status'] = book_basic.find(
+                'span', class_='publish-date').text
             books.append(book_data)
         except:
             pass
@@ -104,7 +99,6 @@ def get_sale_book(request_text):
 def get_sale_books(request, sale_id):
     sale_ids = [1127, 1126, 1125, 1124, 1123, 1122, 1121]
     prefix_url = f"https://www.tenlong.com.tw/special/{sale_ids[sale_id]}"
-
 
     return render(request, 'books.html', {
         'url': prefix_url
