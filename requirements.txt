@@ -1,0 +1,3 @@
+django
+bs4
+requests
