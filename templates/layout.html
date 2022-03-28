@@ -19,23 +19,6 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        特價書籍
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'sale' 0 %}">6折(40% off)</a>
-                        <a class="dropdown-item" href="{% url 'sale' 1 %}">5折(40% off)</a>
-                        <a class="dropdown-item" href="{% url 'sale' 2 %}">999</a>
-                        <a class="dropdown-item" href="{% url 'sale' 3 %}">399</a>
-                        <a class="dropdown-item" href="{% url 'sale' 4 %}">299</a>
-                        <a class="dropdown-item" href="{% url 'sale' 5 %}">199</a>
-                        <a class="dropdown-item" href="{% url 'sale' 6 %}">99</a>
-                    </div>
-                </li>
-            </ul>
             <form action="/keyword/" method="POST" class="form-inline my-2 my-lg-0">
                 {% csrf_token %}
                 <input class="form-control mr-sm-2" name="keyword" type="search" placeholder="Search"
